@@ -1,13 +1,13 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<conio.h>
-int height=20,width=20,gameOver,flag;
+int height=20,width=20,gameOver,flag;  //size of the boundry
 int x,y,fruitX,fruitY,score;
 int tailX[100],tailY[100],countTail=0;
 void setup()
 {
 	gameOver=0;
-	x=width/2;
+	x=width/2;  
 	y=height/2;
 	
 	label1:
@@ -15,7 +15,7 @@ void setup()
 	
 	label2:
 	fruitY=rand()%20;
-	//It can happen if fruit is generated at the wall ie j=0 
+	//It can happen if fruit is generated at the wall ie j=0 so we have generate the fruit again.
 	if(fruitX==0)
 	{
 		goto label1;
@@ -42,9 +42,9 @@ void draw()
 			{
 			
 				if(i==x && j==y)
-					printf("O");
+					printf("O"); //Snake head symbol
 				else if(i==fruitX && j==fruitY)
-					printf("@");
+					printf("@"); //fruit symbol
 				else
 					{
 						int ch=0;
@@ -52,7 +52,7 @@ void draw()
 						{
 							if(i==tailX[k] && j==tailY[k])
 							{
-								printf("o");
+								printf("o");  //Snake body symbol
 								ch=1;
 							}
 						}
@@ -68,7 +68,7 @@ void draw()
 }
 void input()
 {
-	if(kbhit())
+	if(kbhit())  //this is the input we get from keyboard
 	{
 		switch(getch())
 		{
@@ -110,22 +110,22 @@ void algorithm()
 	switch(flag)
 	{
 		case 1:
-			y--;
+			y--;  //left movement of snake
 			break;
 		case 2:
-			y++;
+			y++; 	//right
 			break;
 		case 3:
-			x--;
+			x--;	//up
 			break;
 		case 4:
-			x++;
+			x++;	//down
 		default:
 			break;
 	}
-	if(x<0||x>width||y>height||y<0)
+	if(x<0||x>width||y>height||y<0)  //exceeds the boundary
 		gameOver=1;
-	for(i=0;i<countTail;i++)
+	for(i=0;i<countTail;i++)  //Snake bites itself
 	{
 		if(x==tailX[i]&& y==tailY[i])
 			gameOver=1;
