@@ -1,193 +1,173 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include<iostream>
 #include<conio.h>
-int height=20,width=20,gameOver,flag;  //size of the boundry
+#include<stdlib.h>
+using namespace std;
+bool gameover;
+const int width=20;
+const int height=20;
 int x,y,fruitX,fruitY,score;
-int tailX[100],tailY[100],countTail=0;
-void setup()
+int tailX[100],tailY[100]; 
+int nTail;
+enum eDirection{STOP=0,LEFT,RIGHT,UP,DOWN};
+eDirection dir;
+
+void Setup()
 {
-	gameOver=0;
-	x=width/2;  
+	gameover=false;
+	dir=STOP;
+	x=width/2;  //initial position of snake
 	y=height/2;
-	
-	label1:
-	fruitX=rand()%20;
-	
-	label2:
-	fruitY=rand()%20;
-	//It can happen if fruit is generated at the wall ie j=0 so we have generate the fruit again.
-	if(fruitX==0)
-	{
-		goto label1;
-	}
-		if(fruitY==0)
-	{
-		goto label2;
-	}
+	fruitX=rand()%width;
+	fruitY=rand()%height;
+	score=0;
 }
-//drawing board
-void draw()
+//=====fuction to draw board and generate fruit
+void Draw_Board()
 {
-	int i,j,k;
 	system("cls");
-	for(i=0;i<width;i++)
+	for(int i=0;i<width+2;i++)   
+		cout<<"*";
+	cout<<endl;
+	for(int i=0;i<height;i++)
 	{
-		for(j=0;j<height;j++)
+		for(int j=0;j<width;j++)
 		{
-			if(i==0||j==width-1||j==0||i==height-1)
-			{
-				printf("*");
-			}
+			if(j==0)
+				cout<<"*";
+			if(i==y&&j==x)
+				cout<<"O";
+			else if(i==fruitY&&j==fruitX)
+				cout<<"@";
 			else
 			{
-			
-				if(i==x && j==y)
-					printf("O"); //Snake head symbol
-				else if(i==fruitX && j==fruitY)
-					printf("@"); //fruit symbol
-				else
+				bool print=false;
+				for(int k=0;k<nTail;k++)
+				{ 
+					if(tailX[k]==j&&tailY[k]==i)
 					{
-						int ch=0;
-						for(k=0;k<countTail;k++)
-						{
-							if(i==tailX[k] && j==tailY[k])
-							{
-								printf("o");  //Snake body symbol
-								ch=1;
-							}
-						}
-						if(ch==0)
-							printf(" ");
+						cout<<"o";
+						print=true;
 					}
+				}
+					if(!print)
+					cout<<" " ;
 			}
-		
-		}
-				printf("\n");
+			if(j==width-1) cout<<"*";
 	}
-	printf("SCORE: %d",score);
+		cout<<endl;
+	}
+	for(int i=0;i<width+2;i++) 
+		cout<<"*";
+	cout<<endl;
+	cout<<"Score:"<<score<<endl;
 }
-void input()
+// function to process user input
+void user_input()
 {
-	if(kbhit())  //this is the input we get from keyboard
+	if(_kbhit()) //keyboard hit
 	{
-		switch(getch())
+		switch(_getch())
 		{
 			case 'a':
-				flag=1;
+				dir=LEFT;
 				break;
-			case 's':
-				flag=2;
+			case 'd':
+				dir=RIGHT;
 				break;
 			case 'w':
-				flag=3;
+				dir=UP;
 				break;
-			case 'z':
-				flag=4;
+			case 's':
+				dir=DOWN;
 				break;
 			case 'x':
-				gameOver=1;
+				gameover=true;
 				break;
 		}
 	}
 }
-void algorithm()
+
+//function 
+void logic()
 {
-	int i;
-	int prevX=tailX[0];
+	int prevX =tailX[0];
 	int prevY=tailY[0];
-	int prev2X, prev2Y;
+	int prev2X,prev2Y;
 	tailX[0]=x;
 	tailY[0]=y;
-	for(i=1;i<countTail;i++)
+	for(int i=1;i<nTail;i++)
 	{
 		prev2X=tailX[i];
 		prev2Y=tailY[i];
-		tailX[i]=x;
-		tailY[i]=y;
+	    tailX[i]=prevX;   
+		tailY[i]=prevY;
 		prevX=prev2X;
 		prevY=prev2Y;
 	}
-	switch(flag)
+	switch(dir)
 	{
-		case 1:
-			y--;  //left movement of snake
-			break;
-		case 2:
-			y++; 	//right
-			break;
-		case 3:
-			x--;	//up
-			break;
-		case 4:
-			x++;	//down
+		case LEFT:
+		x--;
+		break;
+		case RIGHT:
+		x++;
+		break;
+		case UP:
+		y--;
+		break;	
+		case DOWN:
+		y++;
+		break;
 		default:
-			break;
+		break;
 	}
-	if(x<0||x>width||y>height||y<0)  //exceeds the boundary
-		gameOver=1;
-	for(i=0;i<countTail;i++)  //Snake bites itself
+	//if boundary  is touched => exit game
+	if(x<0||x>=width||y>=height||y<0)    
+		gameover=true;
+	//if touches itself => exit game   
+	for(int i=0;i<nTail;i++)
 	{
 		if(x==tailX[i]&& y==tailY[i])
-			gameOver=1;
+			gameover=true;
 	}
-	if(x==fruitX && y==fruitY)
-	{
-			label3:
-		fruitX=rand()%20;
-		
-		label4:
-		fruitY=rand()%20;
-		//It can happen if fruit is generated at the wall ie j=0 
-		if(fruitX==0)
+	
+	if(x>=width) x=0; else if(x<0) x=width-1;  
+	if(y>=height) y=0; else if(y<0) y=height-1;
+			
+		if(x==fruitX && y==fruitY)
 		{
-			goto label3;
+			score+=10;
+			fruitX =rand() % width;
+			fruitY =rand() % height;
+			nTail++;
 		}
-			if(fruitY==0)
-		{
-			goto label4;
-		}
-		score+=10;
-		countTail++;
-	}
 }
-int main()
-{
+
+int main(){
 	int m,n;
-	char c;
-	label5:
+	char ch;
+	cout<<" 					:::::WELCOME TO SLYTHERIN:::::					"<<endl;
+	while(1)
+	{
 	
-	setup();
-	while(!gameOver)
-	{
-		draw();
-		input();
-		algorithm();
-	}
-	for(m=0;m<100000;m++) //to slow
-	{
-		for(n=0;n<10000;n++)
+		cout<<"Press W to Continue"<<endl<<"Press X to Exit"<<endl;
+		cin>>ch;
+		system("cls");
+		if(ch=='W'||ch=='w')
 		{
-			
+		     Setup();
+		     while(!gameover)
+		     {
+			     Draw_Board();
+			     user_input();
+			     logic();
+		     }    
+		}
+		if(ch=='X'||ch=='x')
+		{
+			cout<<endl<<endl<<"				SEE YOU LATER ALLIGATOR"<<endl;
+			exit(1);
 		}
 	}
-	for(m=0;m<1000;m++) //to slow
-	{
-		for(n=0;n<1000;n++)
-		{
-			
-		}
-	}
-	while(0){
-	
-	printf("\n Press Y to continue again: ");
-	scanf("%c",&c);
-	if(c=='y'||c=='Y')
-	{
-		goto label5;
-	}
-	else 
-	break;
-}
-	
 	return 0;
 }
